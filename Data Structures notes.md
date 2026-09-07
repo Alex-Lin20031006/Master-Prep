@@ -97,6 +97,184 @@ print("End")
 ```
 2.  C++
 ```c++
+#include <iostream>
+using namespace std;
 
+struct Node{
+    int data;   //save the data
+    Node* next; //pointer to the next node
+
+    Node(int val): data(val), next(nullptr) {} //constructor to initialize the node
+};
+
+int main(){
+    //create 3 nodes in heap memory(堆積記憶體) 
+    Node* node1=new Node(10); //create a new node with data 10
+    Node* node2=new Node(20); 
+    Node* node3=new Node(30); 
+
+    //用指標串起來
+    node1->next=node2;  //node1's next points to node2
+    node2->next=node3;
+
+    //print the linked list
+    Node* current=node1;
+    while(current!=nullptr){ //while current is not null
+        cout<<current->data<<" -> ";
+        current=current->next;
+    }
+    cout<<"nullptr(end)"<<endl;
+
+    //delete the nodes to free memory
+    delete node1;
+    delete node2;
+    delete node3;
+
+    return 0;
+}
 ```
+>[!NOTE]
+>程式運作邏輯：不管是Python或C++，要找到最後一個節點，都必須使用while迴圈從頭找。這就是Linked List 尋找資料要O(n)的時間。
+#### 實作三：Linked List 的「中間插隊」
+假設目前的串列是：10 -> 30。現在要在中間插入一個20，變成10 -> 20 -> 30。
+1.  Python
+```python
+class Node:
+    def __init__(self,data):
+        self.data=data
+        self.next=None
+
+#建立初始
+node1=Node(10)
+node3=Node(30)
+node1.next=node3
+
+print("Initial")
+def print_list(head):
+  curr=head
+  while curr:
+    print(curr.data, end=" -> ")
+    curr=curr.next
+  print("None")
+
+print_list(node1)
+
+#開始插隊
+node2=Node(20)
+node2.next=node1.next
+node1.next=node2
+
+print("\nAfter insertion")
+print_list(node1)
+```
+２.  C++
+```c++
+#include <iostream>
+using namespace std;
+
+struct Node{
+    int data;   //save the data
+    Node* next; //pointer to the next node
+
+    Node(int val): data(val), next(nullptr) {} //constructor to initialize the node
+};
+
+void printList(Node* head){
+    Node* current=head;
+    while(current!=nullptr){ //while current is not null
+        cout<<current->data<<" -> ";
+        current=current->next;
+    }
+    cout<<"nullptr(end)"<<endl;
+}
+
+int main(){
+    //initial
+    Node* node1=new Node(10); //create a new node with data 10
+    Node* node3=new Node(30);
+    node1->next=node3;
+
+    cout<<"Initial linked list: ";
+    printList(node1);
+
+    //開始插隊
+    Node* node2=new Node(20);
+    node2->next=node1->next;
+    node1->next=node2;
+
+    cout<<"Linked list after insertion: ";
+    printList(node1);
+
+    //delete the nodes to free memory
+    delete node1;
+    delete node2;
+    delete node3;
+
+    return 0;
+}
+```
+### 4.  Stack與Queue
+這兩個是非常經典的「抽象（行為規則）資料型態」，底層可以用Array或Linked List來實作都可以。<br>
+1.  Stack - 後進先出(LIFO)<br>
+- 專有名詞：<br>
+  - Push：把資料放進堆疊頂端<br>
+  * Pop：把堆疊頂堆的資料拿走<br>
+* 應用：瀏覽器的「上一頁」功能
+2.  Queue - 先進先出(FIFO)<br>
+- 專有名詞：<br>
+  - Enqueue(Push)：把資料加入隊伍尾端<br>
+  * Dequeue(Pop)：把隊伍最前端的資料拿走<br>
+* 應用：印表機的工作排隊（先送出的文件先印）、封包傳輸
+#### 實作：Stack和Queue
+現代開發中，很少需要從頭寫這兩種資料型態的實作，因為程式語言的標準庫都內建好了。<br>
+1.  Python：在Python中，list可以直接當成stack使用；而queue則推薦使用collections.dequeue。
+```python
+from collections import deque
+
+#Stack
+stack=[]
+stack.append("plate A")
+stack.append("plate B")
+stack.append("plate C")#last in
+print("Stack Pop:", stack.pop())#first out
+
+#Queue
+queue=deque()
+queue.append("customer A")#first in
+queue.append("customer B")
+queue.append("customer C")
+print("Queue Dequeue:", queue.popleft())#first out
+```
+2.  C++：STL直接提供了stack與queue
+```c++
+#include <iostream>
+#include <stack>
+#include <queue>
+using namespace std;
+
+int main(){
+    //stack
+    stack<string> s;
+    s.push("plate A");
+    s.push("plate B");
+    s.push("plate C");
+    cout<<"Top of stack: "<<s.top()<<endl; //C
+    s.pop();
+    cout<<"Top of stack after pop: "<<s.top()<<endl; //B
+
+    //queue
+    queue<string> q;
+    q.push("customer A");
+    q.push("customer B");
+    q.push("customer C");
+    cout<<"Front of queue: "<<q.front()<<endl; //customer A
+    q.pop();
+    cout<<"Front of queue after pop: "<<q.front()<<endl; //customer B
+
+    return 0;
+}
+```
+### 5.  雜湊表（Hash Table/ Map）
+### 6.  樹狀結構（Tree）
+###
 ###
