@@ -1,58 +1,58 @@
 # Logic Design
 ## CH0 Concepts
-- `Analog（類比訊號）`：連續變化的訊號
-- `數位邏輯的核心`：使用簡單的離散狀態來表示、處理資訊
-- `Truth Table（真值表）`：每一種輸入組合會產生什麼輸出
+- `Analog`: Continuously varying signal
+- `Core of Digital Logic`: Using simple discrete states to represent and process information
+- `Truth Table`: Shows what output is produced for every combination of inputs
 >[!IMPORTANT]
->- n 個 binary inputs → $2^n$種可能組合
+>- n binary inputs → $2^n$ possible combinations
 
 >[!TIP]
->- `AND`：全部符合成立
->- `OR`：一個符合就成立
->- `NOT`：只有一個input，輸出為反向
+>- `AND`: Evaluates to true only when all inputs are true
+>- `OR`: Evaluates to true if at least one input is true
+>- `NOT`: Takes only one input and outputs its inverse
 ## CH1 Number Systems
-#### CH1-1 名詞
-- `Decimal`（Base 10）：十進位（日常使用）
-- `Hexadecimal`：十六進位
->[!TIP]
->- 組成元素：0-9 和 A-F (其中 A=10, B=11, C=12, D=13, E=14, F=15)
->- 進位標示：通常在右下角加上 $n_{16}$ 或 $n_{hex}$，或者在前方加上 `0x`。
-> - 表示範例：
->     - 數學標記法： $A3F_{16}$ 或 $2C_{16}$
->     - 程式碼標記法：`0x2C` (在網頁或程式中更常用)
-
-- `Binary`（Base 2）：二進位
-- `二進位表示法`： $1011_2$ （寫在右下角）
+#### CH1-1 Terminology and Key Concepts
+- `Decimal`: Base-10 system (used in daily life)
+- `Binary`: Base-2 system
+- `Binary Representation`: $1011_2$ (written as a subscript)
 >[!NOTE]
 >EX:<br>
 >$1011_2$ = $1(2^3)+0(2^2)+1(2^1)+1(2^0)$ = $11_{10}$
 
-- `bit（Binary Digit）`：一個二進位數字
+- `bit (Binary Digit)`: A single binary digit
 >[!TIP]
->- 1 bit → 2 states（可能是0或1）<br>
+>- 1 bit → 2 states (can be 0 or 1)<br>
 >- n bits → $2^n$ possible values<br>
->- n bits 的 unsigned range = 0~ $(2^n -1)$
+>- Unsigned range for n bits = 0~ $(2^n -1)$
+
+- `Hexadecimal`: Base-16 system
+>[!TIP]
+>- Elements: 0-9 and A-F (where A=10, B=11, C=12, D=13, E=14, F=15)
+>- Representation: Commonly indicated by a subscript $n_{16}$ or $n_{hex}$, or prefixed with `0x`.
+> - Examples:
+>      - Mathematical notation: $A3F_{16}$ or $2C_{16}$
+>      - Code notation: `0x2C` (more commonly used in web and programming)
 
 >[!IMPORTANT]
->- 1 個 Hex digit 剛好代表 4 個 Binary bits
->- Ex： $10101111_2 = AF_{16}$ <br>
+>- 1 Hex digit corresponds exactly to 4 Binary bits
+>- Ex: $10101111_2 = AF_{16}$ <br>
 > ```text
 > 1010    1111
 >  ↓        ↓
 >  A        F
 > ```
 >---
->- 如果不足4的倍數，往左邊補0
->- Ex： $101101_2 = 2D_{16}$ <br>
+>- If the number of bits is not a multiple of 4, pad with leading 0s to the left
+>- Ex: $101101_2 = 2D_{16}$ <br>
 > ```text
 > 0010    1101
 >  ↓        ↓
 >  2        D
 > ```
 
-- `Byte`：8 bits
+- `Byte`: 8 bits
 #### CH1-2
-Binary Addition：
+Binary Addition:
 #### CH1-3
 #### CH1-4
 #### CH1-5
