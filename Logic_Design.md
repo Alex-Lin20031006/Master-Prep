@@ -16,7 +16,7 @@
 - `Binary`: Base-2 system
 - `Binary Representation`: $1011_2$ (written as a subscript)
 >[!NOTE]
->EX:<br>
+>Ex:<br>
 >$1011_2$ = $1(2^3)+0(2^2)+1(2^1)+1(2^0)$ = $11_{10}$
 
 - `bit (Binary Digit)`: A single binary digit
@@ -51,15 +51,80 @@
 > ```
 
 - `Byte`: 8 bits
-#### CH1-2
+#### CH1-2 Binary Addition
 Binary Addition:
-#### CH1-3
-#### CH1-4
-#### CH1-5
+| A | B | RESULT |
+| :-: | :-: | :-: |
+| 0 | 0 | 0 |
+| 0 | 1 | 1 |
+| 1 | 0 | 1 |
+| 1 | 1 | 10 |
+>[!IMPORTANT]
+>- $1+1 = 10_2$
+
+>[!NOTE]
+>Ex:<br>
+>$1011_2 +0110_2 =?$<br>
+>```text
+>   1011
+> + 0110
+> ------
+>  10001
+>```
+>Ans: $10001_2 = 17$
+#### CH1-3 Introduction to Adders
+- $1+1=10_2$ , which means:
+  - $Sum=0$
+  - $Carry=1$
+- A Half Adder can perform the following:
+  ```text
+  A ──┐
+      │
+      ├── Half Adder ── Sum
+      │
+  B ──┘               └─ Carry
+  ```
+>[!TIP]
+>Its core logic is:
+>  - $Sum = A \oplus B$
+>  - $Carry = AB$
+
+#### CH1-4 Leading Zeros
+- $1011_2$ and $00001011_2$ represent the same numerical value.
+- This is standard in computers and is known as **8-bit representation**.
+
+#### CH1-5 Knowledge Map (Chapter 1-1 ~ 1-4 Summary)
+```text
+                 Number System
+                      │
+          ┌───────────┼───────────┐
+          ↓           ↓           ↓
+       Decimal      Binary       Hex
+       Base 10      Base 2      Base 16
+          │           │           │
+          │           │           │
+          └────── Conversion ─────┘
+                      │
+                      ↓
+                     Bits
+                      │
+                      ↓
+                Binary Arithmetic
+                      │
+                      ↓
+                  Logic Gates
+                      │
+                      ↓
+                    Adders
+                      │
+                      ↓
+                     ALU
+```
+
 #### CH1-6
 #### CH1-7
 ## CH2 Boolean Algebra
-## CH3 Boolean Expression
+## CH3 Boolean Expressions
 ## CH4 Combinational Logic
 ## CH5 Sequential Logic
 ## CH6 Registers and Counters
