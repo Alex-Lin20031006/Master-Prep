@@ -9,11 +9,11 @@ This repository connects **data structures, digital logic, computer organization
 | Topic | Notes | Focus | Current scope |
 | --- | --- | --- | --- |
 | Data Structures | [Data Structures notes.md](Data%20Structures%20notes.md) | Data representation, common structures, and programming examples | Existing study draft; not audited as part of the architecture update |
-| Logic Design | [Logic_Design.md](Logic_Design.md) | Number systems, binary arithmetic, gates, and adders | Introductory material is present; later chapters are outlines |
+| Logic Design | [Logic_Design.md](Logic_Design.md) | Boolean algebra, K-maps, combinational/sequential circuits, counters, FSMs, memory, and HDL | CH0–CH9 completed as foundation-to-intermediate study notes, with worked examples and sources |
 | Computer Organization and Design | [Computer_Organization_and_Design.md](Computer_Organization_and_Design.md) | Representation, RV32I, datapaths, control, pipelines, caches, and I/O | Structured foundation notes with worked examples and sources |
 | Computer Architecture | [Computer_Architecture.md](Computer_Architecture.md) | Performance, Amdahl's law, prediction, memory systems, multicore, and Roofline | Foundation-to-intermediate notes, with introductory advanced topics |
 
-**Language:** This README is in English. The new architecture and organization notes use Traditional Chinese explanations with English technical terms. Existing notes contain both languages.
+**Language:** This README is in English. The logic design, architecture, and organization notes use Traditional Chinese explanations with English technical terms. The data structures draft contains both languages.
 
 ## Learning Goals
 
@@ -26,29 +26,31 @@ This repository connects **data structures, digital logic, computer organization
 
 ## Recommended Learning Path
 
-1. **Programming and representation:** Review arrays, pointers, binary numbers, hexadecimal, and basic Boolean logic.
+1. **Programming and digital logic:** Review arrays and pointers, then work through Logic Design CH0–CH7: representation, Boolean algebra, combinational circuits, timing, counters, and FSMs. CH8–CH9 introduce memory, HDL, and implementation concerns.
 2. **Organization, Sections 2–5:** Study integer/floating-point representation, RV32I instructions, arrays, loops, and calling conventions.
 3. **Organization, Sections 6–9:** Follow datapaths and control signals; work through pipeline hazards, cache fields, and I/O mechanisms.
 4. **Architecture, Sections 2–6:** Calculate CPU time, speedup, AMAT, and address translation.
 5. **Architecture, Sections 7–9:** Introduce coherence, consistency, parallelism, accelerators, and embedded-system trade-offs.
 6. **Practice and verify:** Complete the exercises, run the small code examples, and record your own measurements.
 
-The two new documents intentionally overlap at their boundary: **organization** explains how the machine works; **architecture** uses that foundation to reason about design choices and performance. Course titles vary, so this is a reading convention for this repository.
+The organization and architecture documents intentionally overlap at their boundary: **organization** explains how the machine works; **architecture** uses that foundation to reason about design choices and performance. Course titles vary, so this is a reading convention for this repository.
 
 ## What the New Notes Include
 
 - Linked tables of contents and consistent section numbering.
 - Definitions, formulas with units, and clearly stated modeling assumptions.
-- **22 original textbook-style worked examples**, plus concise discussions of two identified examples from the public textbook *Dive Into Systems*.
+- The architecture and organization pair contains **22 original textbook-style worked examples**, plus concise discussions of two identified examples from the public textbook *Dive Into Systems*.
+- Logic Design adds **28 original textbook-style worked examples**, 15 practice questions with answers, and an independently derived D-flip-flop solution to the enabled counter specification identified as Plantz Chapter 5, Example 5-a.
 - Practice questions with expandable answers.
 - A complete C bit/byte inspection example and a Python direct-mapped cache model.
+- Logic truth tables, K-maps, FSM diagrams, a Python verification script, and a SystemVerilog sequence detector with explicit validation limits.
 - RV32I assembly examples and a register-by-register walkthrough.
 - Practical connections to image processing, sensor systems, memory layout, and Raspberry Pi development.
 - Section-level source identifiers and reference tables.
 
 ## Sources and Verification Policy
 
-The new notes were researched against publicly accessible primary sources on **September 27, 2026**:
+The new notes were researched against publicly accessible primary sources on **September 26, 2026**:
 
 | Resource | Why it is used |
 | --- | --- |
@@ -57,6 +59,8 @@ The new notes were researched against publicly accessible primary sources on **S
 | [Cornell CS 3410](https://www.cs.cornell.edu/courses/cs3410/2026sp/) | Public explanations of representation, RISC-V, caches, virtual memory, and concurrency |
 | [RISC-V ISA specifications](https://docs.riscv.org/reference/isa/v20240411/unpriv/rv32.html) and [psABI](https://riscv-non-isa.github.io/riscv-elf-psabi-doc/) | Instruction semantics and calling conventions |
 | [Dive Into Systems](https://diveintosystems.org/book/index.html) | Public textbook explanations and identified worked examples |
+| [Robert G. Plantz's public textbook](https://bob.cs.sonoma.edu/IntroCompOrg-x64/bookch5.html) and [All About Circuits](https://www.allaboutcircuits.com/textbook/digital/chpt-8/karnaugh-maps-truth-tables-boolean-expressions/) | Boolean logic, counters, K-maps, and sequential-circuit explanations |
+| [AMD UG901](https://docs.amd.com/r/2023.2-English/ug901-vivado-synthesis/Always-Procedures), [Altera design guidance](https://docs.altera.com/r/docs/683323/18.1/intel-quartus-prime-standard-edition-user-guide-design-recommendations/metastability-analysis-in-the-intel-quartus-prime-software), and [TI SCEA094](https://www.ti.com/document-viewer/lit/html/SCEA094) | HDL, synchronization, reset, and switch-debounce implementation concerns |
 | [MIT 6.5900, Fall 2023](https://csg.csail.mit.edu/6.5900F23/lecnotes.html) | Advanced pipelines, prediction, coherence, and consistency |
 | [Berkeley Roofline report](https://www2.eecs.berkeley.edu/Pubs/TechRpts/2008/EECS-2008-134.html) | Compute-versus-memory performance modeling |
 | [Raspberry Pi documentation](https://www.raspberrypi.com/documentation/computers/processors.html) and [Linux DMA documentation](https://docs.kernel.org/core-api/dma-api-howto.html) | Hardware context and device-memory interfaces |
@@ -86,11 +90,15 @@ For the optional examples:
 | --- | --- | --- |
 | C bit/byte inspection | C11-compatible compiler | Copy the complete snippet and follow Organization §10.1 |
 | Python cache model | Python 3 | Copy the complete snippet and follow Architecture §10.1 |
+| Python logic checks | Python 3 | Copy the complete snippet in Logic Design §9.3 into `logic_checks.py`, then run `python3 logic_checks.py` |
+| SystemVerilog sequence detector | A SystemVerilog simulator; a target FPGA toolchain for implementation | Logic Design §9.2 provides RTL and expected behavior; a complete testbench and board project are planned |
 | RV32I assembly | A suitable RISC-V assembler and execution environment | The notes give instruction/function examples; a full toolchain tutorial is not yet included |
 
 **Architecture distinction:** Raspberry Pi 3 uses Arm hardware. The RV32I examples are for learning and do not run natively on the Pi or an Apple Silicon Mac.
 
 The small C and Python examples and numerical worked examples were checked during preparation. The RV32I function was traced against its stated assumptions; it was not presented as a board-tested application. No real-device performance measurements are included.
+
+The logic Python checks passed K-map/BCD equivalence, all eight FSM state/input combinations, and all **8,191 bitstreams of lengths 0–12** against an independent substring matcher. These checks validate the mathematical model, not the SystemVerilog source. RTL simulation, synthesis, static timing analysis, and FPGA testing are **planned**.
 
 ## Repository Contents
 
@@ -98,17 +106,18 @@ The small C and Python examples and numerical worked examples were checked durin
 | --- | --- |
 | `README.md` | Overview, reading order, and source policy |
 | `Data Structures notes.md` | Existing data structures notes |
-| `Logic_Design.md` | Existing logic design notes and chapter outline |
+| `Logic_Design.md` | CH0–CH9 logic design notes, worked examples, practice answers, and a source map |
 | `Computer_Organization_and_Design.md` | Foundations and implementation mechanisms |
 | `Computer_Architecture.md` | Performance and architectural trade-offs |
 
-This is a notes repository. Code is currently embedded in the Markdown documents; there are no standalone labs, RTL implementations, or benchmark datasets in this update.
+This is a notes repository. Code, including the illustrative RTL module, is embedded in Markdown; standalone labs, an FPGA project, and benchmark datasets are not yet included.
 
 ## Suggested Next Steps
 
 These are study suggestions, not completed work:
 
-- [ ] Complete the remaining Logic Design chapters.
+- [ ] Add a SystemVerilog testbench and reproducible simulator workflow for the sequence detector.
+- [ ] Implement the proposed debounced mod-6 counter project and document pin assignments, timing constraints, and hardware results.
 - [ ] Review and test the earlier data structures examples.
 - [ ] Work through the new paper-and-pencil exercises before viewing the answers.
 - [ ] Set up a documented RV32I simulation workflow.
