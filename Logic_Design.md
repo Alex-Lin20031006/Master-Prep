@@ -1,36 +1,11 @@
-# Logic Design｜邏輯設計完整學習筆記
+# Logic Design｜邏輯設計學習筆記
 
-> **閱讀定位：從二進位、邏輯閘，到能自行設計計數器與有限狀態機。** 延續原筆記 CH0–CH9 的順序，補齊 CH1-6、CH1-7 與後續章節。解說使用繁體中文，保留英文術語，便於對照英文課程。
->
-> **查核日期：2026-09-26。** 本篇是入門至進階概覽，不是完整 VLSI／CDC 專論。L01–L28 為自行編寫的教科書型例題；「公開教材原例」另行標示出處。電路延遲與取樣條件是題目假設，不是某顆 IC 的實測規格。
-
-[回到 README](README.md) · [Computer Organization and Design](Computer_Organization_and_Design.md) · [Computer Architecture](Computer_Architecture.md)
-
-## 目錄與學習成果
-
-| 章節 | 主題 | 讀完應能做到 |
-| --- | --- | --- |
-| [CH0](#ld-0) | Concepts | 分清類比、數位、組合與循序邏輯 |
-| [CH1](#ld-1) | Number Systems | 轉換進位制、處理二補數、BCD 與 Gray code |
-| [CH2](#ld-2) | Boolean Algebra | 用布林定律證明等價與化簡 |
-| [CH3](#ld-3) | Boolean Expressions | 從真值表建立 SOP/POS，使用 K-map |
-| [CH4](#ld-4) | Combinational Logic | 設計 MUX、decoder、adder、comparator、ALU |
-| [CH5](#ld-5) | Sequential Logic | 分辨 latch／flip-flop，計算 setup／hold |
-| [CH6](#ld-6) | Registers and Counters | 設計 shift register、mod-N counter、PWM |
-| [CH7](#ld-7) | Finite State Machine | 從規格推導狀態表、轉移與輸出 |
-| [CH8](#ld-8) | Memory and Digital Systems | 計算容量、理解 LUT／ROM、整合 controller 與 datapath |
-| [CH9](#ld-9) | Advanced Digital Design | 閱讀 HDL、檢查 CDC、debounce、reset 與驗證界線 |
-| [附錄 A](#ld-practice) | 自我測驗 | 紙筆題、答案與學習檢核 |
-| [附錄 B](#ld-sources) | 來源與閱讀地圖 | 追查公式、教材原例與官方文件 |
-
-建議 CH0–CH4 先做所有真值表；CH5–CH7 每題畫出時序或狀態轉移；CH8–CH9 再接到程式與硬體實作。第一次閱讀不必先買 FPGA。
-
-<a id="ld-0"></a>
-## CH0 — Concepts：數位抽象與邏輯設計
-
+## CH0 Concepts
 ### 0.1 數位訊號仍然由實體電路承載
-
-Analog signal 可以連續變化；digital abstraction 把一定範圍的實體量視為 0 或 1。**不是每個數位系統都用 0 V／5 V，也不是邏輯 1 必須等於電源電壓。** 必須看元件的輸入、輸出與供電規格。[R1]
+- Analog signal 可以連續變化
+- digital abstraction 把一定範圍的實體量視為 0 或 1。
+>[!WARNING]
+>- **不是每個數位系統都用 0 V／5 V，也不是邏輯 1 必須等於電源電壓。** 必須看元件的輸入、輸出與供電規格。
 
 | 參數 | 意義 |
 | --- | --- |
@@ -39,19 +14,22 @@ Analog signal 可以連續變化；digital abstraction 把一定範圍的實體�
 | $V_{OL,max}$ | LOW 輸出的最高保證電壓 |
 | $V_{OH,min}$ | HIGH 輸出的最低保證電壓 |
 
-介於輸入 LOW 與 HIGH 保證範圍之間的電壓，不保證被判成哪個值。Noise margin 是輸出保證與輸入需求之間的餘裕，不是可以任意超過 absolute maximum ratings 的許可。
+介於輸入 LOW 與 HIGH 保證範圍之間的電壓，不能保證被判成哪個值。Noise margin 是輸出保證與輸入需求之間的餘裕，不是可以任意超過 absolute maximum ratings 的許可。
 
-**教科書型例題 L01：noise margin。** 假設某介面的 $V_{OH,min}=2.9$ V、$V_{IH,min}=2.0$ V、$V_{IL,max}=0.8$ V、$V_{OL,max}=0.3$ V：
+- **例題 L01：noise margin。** 假設某介面的 $V_{OH,min}=2.9$ V, $V_{IH,min}=2.0$ V, $V_{IL,max}=0.8$ V, $V_{OL,max}=0.3$ V：
 
 $$NM_H=2.9-2.0=0.9\ V,\qquad NM_L=0.8-0.3=0.5\ V$$
 
-這只分析邏輯準位；實際接線還要檢查電壓容忍度、輸出電流與負載。**應用：** 感測器輸出接到開發板時，不可僅因「兩邊都是數位訊號」就認定相容。
-
 ### 0.2 真值表與基本邏輯閘
 
-n 個獨立 binary inputs 有 $2^n$ 種輸入組合。Truth table 必須列出所有允許的組合。
-
-本篇記號：$\overline A$ 或 A' 是 NOT；AB 是 AND；A+B 是 OR；$A\oplus B$ 是 XOR。布林式的「+」不是整數加法。[R2]
+- n 個獨立 binary inputs 有 $2^n$ 種輸入組合。Truth table 必須列出所有允許的組合。
+>[!NOTE]
+>符號:
+>- $\overline A$ 或 A' 是 NOT
+>- AB 是 AND
+>- A+B 是 OR
+>- $A\oplus B$ 是 XOR
+>- 布林式的 + 不是整數加法。
 
 | A | B | AND | OR | XOR | NAND | NOR | XNOR |
 | --- | --- | --- | --- | --- | --- | --- | --- |
