@@ -15,6 +15,36 @@ This repository connects **data structures, digital logic, computer organization
 
 **Language:** This README is in English. The logic design, architecture, and organization notes use Traditional Chinese explanations with English technical terms. The data structures draft contains both languages.
 
+## ESE Core Preparation Notes
+
+The [ESE Core Study Guide](ESE_Core/README.md) adds seven Traditional Chinese notes with English technical terms, researched on **September 29, 2026 (Asia/Taipei)**.
+
+| Course mapping | Notes |
+| --- | --- |
+| ECEN 5613 | [Embedded System Design](ESE_Core/01_Embedded_System_Design.md) |
+| ECEN 5623 | [Real-Time Embedded Systems](ESE_Core/02_Real_Time_Embedded_Systems.md) |
+| ECEN 5813 + 5713 | [Embedded Software and Advanced Embedded Linux](ESE_Core/03_Embedded_Software_and_Linux.md) |
+| ECEN 5823 + 5773 extension | [IoT Firmware and Industrial IoT](ESE_Core/04_IoT_Firmware_and_Industrial_IoT.md) |
+| ECEN 5833 | [Low Power Embedded Design](ESE_Core/05_Low_Power_Embedded_Design.md) |
+| ECEN 5853 | [Embedding Sensors and Motors](ESE_Core/06_Embedding_Sensors_and_Motors.md) |
+| ECEN 5863 | [Programmable Logic Embedded Design](ESE_Core/07_Programmable_Logic_Embedded_Design.md) |
+
+The official ESE page currently describes choosing **any five core courses**, not taking all seven as individually mandatory courses. This independent study guide covers the seven courses in the supplied list; it is not an official syllabus or a substitute for the applicable catalog and advisor-approved degree plan.
+
+Each note includes explanations, explicit assumptions, original textbook-style examples, applications, exercises with answers, and sources. Public textbook examples are identified separately. The software note combines the introductory and advanced courses; Industrial IoT is a related extension rather than a claimed official two-course sequence.
+
+[Eight Mac-first project specifications](ESE_Core/Projects.md) provide interfaces, milestones, acceptance tests, deliverables, and optional hardware upgrades. All complete projects are **planned**. Six MVPs prioritize native macOS; Linux-specific work uses a suitable Linux environment. The public Spring 2026 ECEN5713 page still specifies an x86-64 host, so an M2 self-study workflow is not claimed to match the supported classroom environment.
+
+Small verification examples are included:
+
+```sh
+python3 ESE_Core/examples/check_models.py
+cc -std=c11 -Wall -Wextra -Werror ESE_Core/examples/firmware_core.c -o /tmp/firmware_core
+/tmp/firmware_core
+```
+
+These were run in the preparation environment: numerical checks, RTA pass/fail cases, 65,536 saturating-adder reference inputs, and C decoding/overflow/ring-buffer tests. No new RTL simulation, Buildroot build, full network project, or hardware measurement is claimed. The sensor note discloses the limited retrieval available for the CTMS motor example.
+
 ## Learning Goals
 
 - Explain how source-level operations become instructions and hardware activity.
@@ -110,7 +140,7 @@ The logic Python checks passed K-map/BCD equivalence, all eight FSM state/input 
 | `Computer_Organization_and_Design.md` | Foundations and implementation mechanisms |
 | `Computer_Architecture.md` | Performance and architectural trade-offs |
 
-This is a notes repository. Code, including the illustrative RTL module, is embedded in Markdown; standalone labs, an FPGA project, and benchmark datasets are not yet included.
+This is primarily a notes repository. `ESE_Core/examples/` contains small executable verification examples; other illustrative code is embedded in Markdown. Complete project implementations, an FPGA board project, and measured benchmark datasets are planned.
 
 ## Suggested Next Steps
 
