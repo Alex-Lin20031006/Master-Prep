@@ -1,11 +1,55 @@
 # Logic Design｜邏輯設計學習筆記
 
+## 入門導讀｜從「判斷」走到「會記憶的電路」
+
+先讀 [共通基礎](Foundations.md)。邏輯設計的核心不是背符號，而是把需求變成能檢查的規則，再把規則實作成電路。例如「門關好而且啟動鍵按下才運轉」就是 AND；「任一警報成立就停止」就是 OR。
+
+| 本篇階段 | 新名詞的白話意思 | 讀完能做什麼 |
+| --- | --- | --- |
+| CH0–1 表示與判斷 | logic level：把電壓範圍當成 0/1；gate：實作布林規則的電路 | 列出輸入、輸出與位元意義 |
+| CH2–3 化簡 | Boolean：只有真假值的代數；minterm：指定一種完整輸入組合 | 寫真值表並化簡 |
+| CH4 組合元件 | MUX：多選一資料選擇器；decoder：把編號轉成選擇訊號 | 用元件組成加法與選擇功能 |
+| CH5–6 記憶與時間 | latch：特定電位時透明；flip-flop：特定邊緣取樣 | 追蹤每次時脈後保存什麼 |
+| CH7 控制 | FSM：有限狀態機；transition：由一個狀態轉到另一個 | 描述需要記住過去的行為 |
+| CH8–9 系統與實作 | datapath：處理資料的路徑；HDL：描述硬體的語言 | 把計算、控制與時間連起來 |
+
+```mermaid
+flowchart TD
+ A[文字需求] --> B[真值表或狀態表]
+ B --> C[組合邏輯]
+ B --> D[狀態暫存器]
+ D --> C
+ C --> D
+ C --> E[輸出]
+ F[時脈] --> D
+```
+
+### 先做一個不含新公式的例子
+
+門關好 `D=1`，啟動按下 `S=1`，馬達允許 `M=1`。定義 `M=D AND S`。四種輸入只有 `D=1,S=1` 得到 1。這是組合規則：放開 S 後就停止。若希望放開後仍運轉，就必須新增「目前是否運轉」的狀態，並指定停止事件。**是否需要記住過去，決定是否需要循序電路。**
+
+> [!NOTE]
+> 電路中的「現在」不是零延遲。輸入改變後，訊號經過邏輯閘要花時間，稱 propagation delay（傳播延遲）。時脈的作用是讓儲存元件在約定時刻取樣，給中間運算足夠時間穩定。
+
+### 看懂後面公式的字母
+
+`X` 常表示輸入，`Y` 常表示輸出，`Q` 表示目前儲存的狀態，`Q_next` 表示下一次更新後的狀態。`f(X)` 的意思是「輸出依輸入規則決定」，不是相乘。`Σm` 是把指定 minterms 以 OR 組合；`ΠM` 是把指定 maxterms 以 AND 組合。這些記法在布林章節再展開。
+
+> [!TIP]
+> 讀時序圖時先在每個有效時脈邊緣畫一條直線，再讀取邊緣前的輸入，最後標出邊緣後的 Q。不要沿著程式碼順序猜硬體時間。
+
+**暖身與答案：** 門關好後只閃一下啟動鍵，是否會持續運轉？上面的組合規則不會。需要加入一個「運轉中」狀態。這也說明電梯、售票機和通訊控制器為何常使用 FSM。
+
+
 ## CH0 Concepts
+
 ### 0.1 數位訊號仍然由實體電路承載
+
 - Analog signal 可以連續變化
 - digital abstraction 把一定範圍的實體量視為 0 或 1。
->[!WARNING]
->- **不是每個數位系統都用 0 V／5 V，也不是邏輯 1 必須等於電源電壓。** 必須看元件的輸入、輸出與供電規格。
+
+> [!WARNING]
+> - **不是每個數位系統都用 0 V／5 V，也不是邏輯 1 必須等於電源電壓。** 必須看元件的輸入、輸出與供電規格。
 
 | 參數 | 意義 |
 | --- | --- |
@@ -23,13 +67,14 @@ $$NM_H=2.9-2.0=0.9\ V,\qquad NM_L=0.8-0.3=0.5\ V$$
 ### 0.2 真值表與基本邏輯閘
 
 - n 個獨立 binary inputs 有 $2^n$ 種輸入組合。Truth table 必須列出所有允許的組合。
->[!NOTE]
->符號:
->- $\overline A$ 或 A' 是 NOT
->- AB 是 AND
->- A+B 是 OR
->- $A\oplus B$ 是 XOR
->- 布林式的 + 不是整數加法。
+
+> [!NOTE]
+> 符號:
+> - $\overline A$ 或 A' 是 NOT
+> - AB 是 AND
+> - A+B 是 OR
+> - $A\oplus B$ 是 XOR
+> - 布林式的 + 不是整數加法。
 
 | A | B | AND | OR | XOR | NAND | NOR | XNOR |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -50,6 +95,7 @@ NOT 把 0 變 1、1 變 0。兩輸入 XOR 表示兩者不同；多輸入串接 X
 電梯只看「現在按哪個樓層」不足以決定動作，還要知道目前位置、方向與門的狀態。這些需要保留的資訊就是 state。組合邏輯也有傳播延遲；「沒有記憶」不表示「零時間」。[R3]
 
 <a id="ld-1"></a>
+
 ## CH1 — Number Systems：數字與編碼
 
 ### 1.1 Binary、hexadecimal、bit 與 byte
@@ -138,7 +184,11 @@ $$10.101_2=2+\tfrac12+\tfrac18=2.625_{10}$$
 **應用：** BCD 用於十進位顯示；Gray code 可用於編碼器與某些 FIFO pointer crossings，但仍需實體時序與同步設計，不能把任意資料轉 Gray 就視為 CDC 已解決。
 
 <a id="ld-2"></a>
+
 ## CH2 — Boolean Algebra：布林代數
+
+> [!NOTE]
+> **讀這一節前：** 布林代數只處理 0 與 1。先把每個符號翻回「且、或、非」，再做等式變形。等式兩側必須對所有允許輸入得到相同輸出，才能互換。
 
 ### 2.1 最常使用的定律
 
@@ -183,7 +233,11 @@ $$G=(A+B)(A+B')=A+BB'=A$$
 **應用：** 同一功能可以有不同 gate-level 結構，工程上再比較面積、延遲、功耗與可用元件，而非只找代數最短寫法。
 
 <a id="ld-3"></a>
+
 ## CH3 — Boolean Expressions：從規格到 SOP、POS 與 K-map
+
+> [!NOTE]
+> **讀這一節前：** SOP 是把多個 AND 項以 OR 連起來；POS 是把多個 OR 項以 AND 連起來。Karnaugh map（卡諾圖）把相鄰只差一個 bit 的輸入放在鄰格，方便找可合併的項。Dont-care 是規格明確允許不拘的情況，不是忘記考慮的輸入。
 
 ### 3.1 Minterm 與 maxterm
 
@@ -258,7 +312,11 @@ $$F_{safe}=AB+A'C+BC$$
 **應用：** 不要把可能 glitch 的一般組合輸出直接當 clock；同步資料路徑通常在滿足時序的 edge 擷取穩定結果。
 
 <a id="ld-4"></a>
+
 ## CH4 — Combinational Logic：組合邏輯設計
+
+> [!NOTE]
+> **讀這一節前：** 把基本邏輯閘組成可重用的積木：MUX 選資料、decoder 把編號轉為選擇線、adder 加數字。先畫輸入輸出的位寬；兩個 4-bit 無號數相加，完整結果可能需要 5 bits。
 
 ### 4.1 通用設計流程
 
@@ -376,7 +434,11 @@ $$GT=A_1B_1'+(A_1\operatorname{XNOR}B_1)A_0B_0'$$
 **實際應用：** ALU 對應 CPU 運算；比較器用於門檻判斷；priority encoder 用於中斷；decoder 用於暫存器與裝置選擇。
 
 <a id="ld-5"></a>
+
 ## CH5 — Sequential Logic：循序邏輯與時序
+
+> [!NOTE]
+> **讀這一節前：** Clock edge（時脈邊緣）是由低到高或由高到低的轉換。Setup time 是取樣前資料需穩定多久，hold time 是取樣後還需保持多久；兩者是硬體時間要求，並非程式延遲指令。
 
 ### 5.1 SR latch 與 D latch
 
@@ -454,7 +516,11 @@ $$t_{cq,min}+t_{logic,min}\ge t_{hold}$$
 Reset／enable 優先序必須明訂。本篇 HDL 例子採 reset 優先。不能把「模擬一開始剛好是 0」當成實際上電保證。[R15]
 
 <a id="ld-6"></a>
+
 ## CH6 — Registers and Counters：暫存器與計數器
+
+> [!NOTE]
+> **讀這一節前：** 暫存器是一組保存多個 bits 的儲存元件；計數器是每次事件依規則更新的狀態。Modulo-N（模 N）表示 N 個狀態後循環，例如 0、1、2、0 是模 3，而不是數到 3 才停。
 
 ### 6.1 Register 與 shift register
 
@@ -542,7 +608,11 @@ PWM 可用 counter 與比較器實現：counter=0…N−1，輸出 `counter < K`
 這些編碼可簡化部分解碼，但通常比二進位計數使用更多儲存位元。不能只以「狀態數多」判定哪一個設計更好。[R16]
 
 <a id="ld-7"></a>
+
 ## CH7 — Finite State Machine：有限狀態機
+
+> [!NOTE]
+> **讀這一節前：** FSM 的 state 是被記住的情況；transition 是輸入條件引發的狀態變化。Moore 輸出由狀態決定，Mealy 輸出由狀態及目前輸入決定。先用文字命名狀態，再為狀態編碼。
 
 ### 7.1 FSM 的四個要素
 
@@ -637,7 +707,11 @@ $$z=Q_1Q_0X$$
 最後一項只是學習設計情境，不代表現有火災偵測專案已完成此模組。
 
 <a id="ld-8"></a>
+
 ## CH8 — Memory and Digital Systems：記憶體與系統整合
+
+> [!NOTE]
+> **讀這一節前：** 記憶體的 word 是一次組織或存取的資料單位，寬度由設計定義；address 是選哪一個位置。Depth 表示位置數，width 表示每位置 bits；總容量是兩者相乘。
 
 ### 8.1 先分清 bit、word、address
 
@@ -706,7 +780,11 @@ flowchart TD
 **應用：** 感測器平均值、像素區塊加總、封包 checksum 都可拆成控制與資料路徑；同一個 adder 反覆使用可節省資源，但增加完成整批工作的週期數。
 
 <a id="ld-9"></a>
+
 ## CH9 — Advanced Digital Design：HDL、同步與驗證
+
+> [!NOTE]
+> **讀這一節前：** Simulation（模擬）按模型追蹤行為；synthesis（合成）把描述轉為硬體結構；STA 檢查路徑時間。三者回答不同問題，模擬輸出正確不代表時脈一定跑得動。
 
 ### 9.1 HDL 描述硬體，不是逐行執行的 CPU 程式
 
@@ -876,6 +954,7 @@ Asynchronous reset 的 assert 不需 clock，但 deassert 應按 domain 安排�
 這是建議的後續練習，倉庫目前沒有完整 FPGA project、pin constraints 或 board measurements。MacBook 與 Raspberry Pi 都可以閱讀筆記、跑 Python；FPGA bitstream 的工具支援需依器件與供應商另行核對。
 
 <a id="ld-practice"></a>
+
 ## 附錄 A — 自我測驗與學習檢核
 
 以下皆為自行編寫的練習，先寫出假設與中間步驟，再展開答案。
@@ -948,6 +1027,7 @@ Asynchronous reset 的 assert 不需 clock，但 deassert 應按 domain 安排�
 - [ ] 清楚分辨數學模型檢查、RTL simulation、STA 與實機測試。
 
 <a id="ld-sources"></a>
+
 ## 附錄 B — 來源、教材原例與閱讀地圖
 
 ### B1. 如何使用來源

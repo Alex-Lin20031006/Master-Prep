@@ -1,5 +1,22 @@
 # ESE Core Study Guide｜核心課程自學筆記
 
+> [!IMPORTANT]
+> **閱讀主線改為領域基礎。** 先讀 [共通基礎](../Foundations.md)，再讀每篇「入門導讀」。下方課程對照只作資源索引，不是必須照做的課表；專案是選讀實作，不決定知識範圍。
+
+| 順序 | 先建立的概念 | 筆記 |
+| --- | --- | --- |
+| 1 | 計算如何連到週邊 | [嵌入式系統設計](01_Embedded_System_Design.md) |
+| 2 | 工作、時間與共享資源 | [即時系統](02_Real_Time_Embedded_Systems.md) |
+| 3 | 程式、記憶體與 OS | [嵌入式軟體與 Linux](03_Embedded_Software_and_Linux.md) |
+| 4 | 通訊層次、交付與信任 | [物聯網](04_IoT_Firmware_and_Industrial_IoT.md) |
+| 5 | 電力、能量與系統預算 | [低功耗](05_Low_Power_Embedded_Design.md) |
+| 6 | 量測、回授與實體動態 | [感測與馬達](06_Embedding_Sensors_and_Motors.md) |
+| 7 | 平行電路與時間約束 | [FPGA](07_Programmable_Logic_Embedded_Design.md) |
+
+每篇先讀詞彙表和小例子，再進原本的計算與設計分析。遇到沒有把握的符號，先回到單位、資料流與時間軸，不必一開始就背公式。
+
+
+
 > 查核日期：2026-09-29（Asia/Taipei）。以使用者提供的七門核心課程圖片為範圍。這是繁體中文＋英文術語的入門到中階自學材料，不是官方課堂講義、2027考綱或學分替代。
 
 [Repository README](../README.md) · [Mac 優先專案規劃](Projects.md)
@@ -69,3 +86,4 @@ cc -std=c11 -Wall -Wextra -Werror ESE_Core/examples/firmware_core.c -o /tmp/firm
 - [ ] 能列清楚power model的rail、時間與單位。
 - [ ] 能用獨立reference檢查sensor model與RTL運算。
 - [ ] 每個demo都附已測與未測範圍，不將planned功能寫成履歷成果。
+

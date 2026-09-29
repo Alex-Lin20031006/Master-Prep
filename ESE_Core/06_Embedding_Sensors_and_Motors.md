@@ -1,14 +1,62 @@
 # Embedding Sensors and Motors｜感測、取樣與馬達控制
 
-> 對應 ECEN 5853。先理解measurement chain，再進feedback與motor model。查核：2026-09-29。先用Mac模擬，電力與機械實驗後續另行設計。
+## 入門導讀｜量測、判斷與控制是三件不同的事
 
-[總覽](README.md) · [P6](Projects.md#p6)
+感測器把物理量轉成可讀訊號；估測與濾波從訊號提取資訊；控制器依目標與量測決定輸出；致動器把輸出轉成力量、速度或其他物理效果。知道溫度不等於能控制溫度。
+
+```mermaid
+flowchart TD
+ A[目標值] --> B[比較與控制器]
+ B --> C[驅動與致動器]
+ C --> D[被控制的物理系統]
+ D --> E[感測與取樣]
+ E --> B
+ F[外界擾動] --> D
+```
+
+| 名詞 | 白話定義 |
+| --- | --- |
+| Calibration 校正 | 建立讀值與參考物理量的對應 |
+| Accuracy 準確度 | 與真實或參考值接近的程度 |
+| Precision 精密度 | 重複量測彼此接近的程度 |
+| Resolution 解析度 | 能分辨的最小變化尺度；不保證準確 |
+| Offset / gain error | 整體偏移／比例斜率錯誤 |
+| ADC | 類比數位轉換器：把輸入電壓轉成數位碼 |
+| Sampling 取樣 | 在離散時間點觀察訊號 |
+| Quantization 量化 | 把連續幅度對應到有限個數位碼 |
+| Aliasing 混疊 | 不同連續訊號在取樣後難以區分 |
+| Filter 濾波器 | 依頻率或其他規則調整訊號成分 |
+| Feedback 回授 | 使用輸出量測修正控制動作 |
+| Setpoint 目標值 | 希望被控制量達到的值 |
+| Error 誤差 | 控制中常定義為目標減量測 |
+| Saturation 飽和 | 致動器到達輸出上限或下限 |
+
+### 逐步例子：12-bit ADC 的數字怎麼變成電壓？
+
+12 bits 有 4096 個碼，通常標成 0 到 4095。假設理想量化步階為 3.3/4096 V，約 0.806 mV。碼值 2048 的對應電壓約 1.65 V；實際端點定義、參考電壓誤差和轉換特性仍看器件。若感測器標定關係為 V=0.5+0.01T，則 T=(1.65−0.5)/0.01=115°C。這只是自編校正模型，不代表所有溫度感測器。
+
+> [!WARNING]
+> 12-bit 解析度不表示讀值有 12-bit 的有效準確度。雜訊、偏移、參考源、非線性與校正都會影響最終結果。
+
+### 不用微積分先懂 P 與 I
+
+P（比例）讓目前誤差越大，修正越大；I（積分）累積過去誤差，讓持續的小偏差也逐步得到修正。積分就像把每一小段時間的「誤差×時間」加起來。微分 D 則對誤差變化趨勢敏感，也容易受到雜訊影響。
+
+**自編例子：** 目標 100 rpm，量測 90 rpm，誤差 10 rpm。若 Kp=0.02/rpm，比例項為 0.2（把輸出定義成 0–1 比例）。這只是控制訊號，不代表轉速立刻變成 100；馬達、負載與供電需要時間反應。I 項過度累積且輸出已飽和會造成 windup，後文再談 anti-windup。
+
+> [!TIP]
+> 畫曲線時標清楚橫軸時間、縱軸物理量與單位。先問「這是感測電壓、估計溫度、目標值，還是控制輸出？」再解讀曲線。
+> [!NOTE]
+> 本篇按領域概念組織，從基礎走向進階；課程代碼不代表先備要求。原有來源與例題保留供第二輪深入閱讀。
+
+[學習總覽](README.md) · [共通基礎](../Foundations.md)
 
 ## 目錄
 
 1. [量測與校正](#s1)　2. [ADC與濾波](#s2)　3. [感測器選型](#s3)　4. [馬達模型與驅動](#s4)　5. [控制與驗證](#s5)　6. [練習與來源](#s6)
 
 <a id="s1"></a>
+
 ## 1. 感測值不是物理量本身
 
 完整鏈：物理量→transducer→signal conditioning→ADC→calibration→filter→decision。每一段都可帶入offset、gain error、noise、delay或saturation。Accuracy、precision、resolution是不同概念；12-bit ADC不表示整套系統有12-bit accuracy。[M1]
@@ -18,7 +66,11 @@
 **例 M2：error budget。** 獨立、零均值random errors的標準差分別0.2與0.3°C，RSS≈0.3606°C；若兩者是有方向的最壞界限，不能直接用RSS，保守加總為0.5°C。偏差不會因多取樣平均自然消失。
 
 <a id="s2"></a>
+
 ## 2. ADC、aliasing與filter
+
+> [!NOTE]
+> **讀這一節前：** Sampling rate 是每秒取幾點；signal bandwidth 描述需要保留的頻率範圍。Nyquist 條件針對有界頻寬理想訊號，實際通常還需類比 anti-alias filter（抗混疊濾波器）和轉換帶餘裕。取樣後再濾波無法一般性恢復已混疊的資訊。
 
 理想N-bit單極性ADC的code bin寬常以`q=Vref/2^N`描述；端點校正formula有時用`2^N−1`映射最大code到滿刻度，兩種定義不能混用。題目必須說明採哪個模型。[M2]
 
@@ -33,6 +85,7 @@
 一階IIR：`y[k]=αx[k]+(1−α)y[k−1]`，0<α≤1；α小反應慢。初值與啟動暫態也應列入測試，不只比steady-state。
 
 <a id="s3"></a>
+
 ## 3. 感測器與encoder
 
 | 類型 | 適合學習的現象 | 誤差／介面問題 |
@@ -50,7 +103,11 @@ ECEN5853公開頁面也以EV、wind與solar場景連結sensor和motor；這裡�
 低速可改量兩脈衝間隔提升解析度，但更新慢；高速用固定window計數較方便。混合估測必須定義切換與timeout，不可在停轉時除以零。
 
 <a id="s4"></a>
+
 ## 4. DC motor：電氣與機械耦合
+
+> [!NOTE]
+> **讀這一節前：** DC motor 是直流馬達。Torque 是轉矩，angular speed 是角速度，inertia 是轉動慣量。Back EMF 是馬達轉動產生、抵抗輸入的電動勢。d/dt 表示某個量每單位時間的變化率；可先把方程讀成「輸入如何被各種效應分配」。
 
 簡化brushed DC motor模型：
 
@@ -68,6 +125,7 @@ PWM duty控制施加電壓的時間比例；在理想模型與合適切換條件
 **例 M8：公開模型的steady-state驗算。** τL=0時i=bω/Kt；代入V=Ri+Keω，得ω=V·Kt/(Rb+KeKt)。上述數值、V=1時ω≈0.0999001rad/s，與教材約0.1rad/s的敘述相符。這是教學模型，不是一顆已指定型號馬達的實測。
 
 <a id="s5"></a>
+
 ## 5. Feedback、PI與飽和
 
 Setpoint r與measurement y的error e=r−y；controller產生u，經driver與plant改變y。P加快反應但可能有steady-state error；I累積誤差可消除某些偏差，但saturation時可能wind up；D對變化敏感也容易放大noise。
@@ -81,6 +139,7 @@ Setpoint r與measurement y的error e=r−y；controller產生u，經driver與pla
 **實際應用：** 風扇轉速控制、輸送帶、solar tracker與位置平台。先做低電壓模擬專案；之後若上motor，需要driver、獨立合適電源、保護與mechanical constraints，GPIO僅輸出控制訊號。
 
 <a id="s6"></a>
+
 ## 6. 練習
 
 1. 10bit、2.5V ADC的ideal bin寬？

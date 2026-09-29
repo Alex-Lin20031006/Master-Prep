@@ -1,5 +1,20 @@
 # Master-Prep
 
+## Beginner-first study edition
+
+Start with [Foundations — Concepts, Vocabulary, and Learning Map](Foundations.md). These notes are organized around the foundations of computing and embedded systems, rather than one project or a particular course syllabus. Read each subject's introductory guide first, then return for worked examples, implementation details, and advanced topics.
+
+| Learning stage | Notes |
+| --- | --- |
+| Shared foundations | [Foundations](Foundations.md) |
+| Digital reasoning and data | [Logic Design](Logic_Design.md), [Data Structures](Data%20Structures%20notes.md) |
+| How computers work | [Computer Organization](Computer_Organization_and_Design.md), [Computer Architecture](Computer_Architecture.md) |
+| Embedded-system fields | [Seven subject guides](ESE_Core/README.md) |
+
+The subject notes use Traditional Chinese explanations with English technical terms, GitHub callouts, visual concept maps, worked examples, and source references. Course mappings and projects below are optional background, not the required learning sequence. The notes introduce the main field concepts and provide routes to deeper study; they are not a claim of exhaustive coverage of every research topic.
+
+
+
 Personal study notes for strengthening electrical engineering and computer science fundamentals before graduate study, with an emphasis on embedded systems and the hardware–software interface.
 
 This repository connects **data structures, digital logic, computer organization, and computer architecture** through explanations, worked examples, exercises, and references.
@@ -159,3 +174,4 @@ These are study suggestions, not completed work:
 When correcting a note, identify the section, explain the error, and attach a reliable source or reproducible calculation. Keep architecture-specific assumptions explicit.
 
 Linked resources remain subject to their authors' terms. Linking a textbook or course does not grant permission to redistribute its full contents. This update does not add or imply a repository-wide license.
+

@@ -1,8 +1,59 @@
 # Embedded System Design｜嵌入式系統設計
 
-> 對應 ECEN 5613；從需求、微控制器到可測試的系統整合。繁體中文＋英文術語。查核：2026-09-29（台北）。這是公開資源整理的自學筆記，不是官方講義或完整考試範圍。
+## 入門導讀｜從計算到實體設備
 
-[學習總覽](README.md) · [專案規劃](Projects.md) · [邏輯先修](../Logic_Design.md)
+先讀 [共通基礎](../Foundations.md)。嵌入式設計關心「輸入從哪來、何時處理、結果如何作用於外界、出錯如何恢復」。智慧洗衣機、鍵盤與汽車控制器都共享這個架構，但不一定使用同一種晶片或作業系統。
+
+| 名詞 | 白話與用途 |
+| --- | --- |
+| MCU, microcontroller 微控制器 | 把 CPU、記憶體與控制週邊整合在一起的晶片 |
+| SBC, single-board computer 單板電腦 | 在一塊板子上組成可運作的電腦；常可執行完整 OS |
+| SoC, system-on-chip | 在晶片內整合多種系統功能；分類與 MCU 有交集 |
+| GPIO | 可由程式讀取或輸出的通用數位接腳 |
+| MMIO, memory-mapped I/O | 用特定位址讀寫來操作週邊 |
+| Register 寄存器 | 此處指週邊內的設定或狀態欄位，不是一般 RAM |
+| Flag 旗標 | 表示某個條件或事件的一個位元 |
+| Mask 遮罩 | 用 1 標出要操作的位元位置 |
+| ISR | 中斷服務常式：回應硬體中斷時執行的函式 |
+| DMA | 專用硬體依設定搬資料，減少 CPU 逐筆搬運 |
+| Watchdog 看門狗 | 未在期限內得到預期服務時觸發恢復的機制 |
+
+### 必懂例子：read-to-clear 與 write-one-to-clear
+
+讀取 read 是向裝置要求回傳資料；寫入 write 是送一個值給裝置。**clear 指把旗標清成 0**；不是刪除程式碼，也不一定是清除資料 buffer。週邊可以把讀寫解釋成「命令」，不能一律當成普通變數賦值。
+
+| 存取類型 | 讀取做什麼 | 寫入做什麼 |
+| --- | --- | --- |
+| 一般 R/W | 回傳目前值 | 用寫入值更新欄位 |
+| RO, read-only | 回傳目前狀態 | 不能當作可寫欄位使用 |
+| RC, read-to-clear | 回傳狀態後清除指定旗標 | 依器件規格；不要自行假設 |
+| W1C, write-one-to-clear | 是否可讀須看欄位規格 | 寫 1 清該位，寫 0 不改該位 |
+| W1S, write-one-to-set | 是否可讀須看欄位規格 | 寫 1 設該位，寫 0 不改該位 |
+
+**自編逐步例題：** 假設三個純 W1C 旗標目前是 `101`，bit 2 和 bit 0 都有事件。只想確認 bit 0 已處理，寫 `001`，結果為 `100`。若寫 `000`，仍是 `101`。不要用一般變數的「寫 0 就清除」直覺。
+
+| 操作前 | 操作 | 回傳／送出值 | 操作後（假設無新事件） |
+| --- | --- | --- | --- |
+| RC 狀態 101 | 第一次讀 | 回傳 101 | 000 |
+| RC 狀態 000 | 第二次讀 | 回傳 000 | 000 |
+| W1C 狀態 101 | 寫 001 | 只確認 bit 0 | 100 |
+| W1C 狀態 101 | 先讀再 OR 001 寫回 | 寫出 101 | 000：兩個都被清除 |
+
+> [!WARNING]
+> `STATUS |= mask` 是「讀、OR、再寫」三個概念步驟，可能把其他已為 1 的 W1C 旗標也清掉。除錯器自動刷新寄存器視窗也可能讀到 RC 寄存器並造成清除。實際還要查保留位、讀寫寬度與事件同時發生的優先規則。
+
+純 W1C 且手冊允許時，概念操作是直接寫欲清除的 mask；混合 R/W、W1C 或保留位的寄存器不能照抄。上述是教學模型，不提供任何晶片實體位址。定義核對 [Microchip Register Bit Types](https://onlinedocs.microchip.com/oxy/GUID-7A87AF7C-8456-416F-A89B-41F172C54117-en-US-10/GUID-28A3C34B-707C-4315-8908-0B68D7C5BE72.html) 與 [Arm CMSIS-SVD register semantics](https://arm-software.github.io/CMSIS_5/SVD/html/elem_registers.html)。
+
+### 不同資料搬運方法怎麼想
+
+Polling 是你一直查看收件匣；interrupt 是新信觸發通知；DMA 是先設定搬運清單，由另一個硬體單元搬資料。三者可搭配使用。中斷不是「任何時候都立刻完成」，還受遮罩、優先序與處理時間影響。
+
+> [!TIP]
+> 讀資料手冊時依序找：位址、寬度、reset value、每個欄位的意義、存取屬性、必要操作順序。先用紙筆寫出一次讀寫前後的狀態，再寫程式。
+> [!NOTE]
+> 本篇按領域概念組織，從基礎走向進階；課程代碼不代表先備要求。原有來源與例題保留供第二輪深入閱讀。
+
+[學習總覽](README.md) · [共通基礎](../Foundations.md) · [邏輯先修](../Logic_Design.md)
 
 ## 目錄
 
@@ -14,6 +65,7 @@
 6. [整合、練習與來源](#s6)
 
 <a id="s1"></a>
+
 ## 1. 先寫出可驗收的需求
 
 嵌入式系統把計算嵌入實體環境；成功條件通常同時包含正確輸出、期限、耗能、成本與可恢復性。溫度資料最後算對，但風扇晚開十秒，仍可能不合規格。[D1]
@@ -38,9 +90,10 @@
 | Linux SBC | 網路、檔案、複雜應用 | OS 排程與儲存會增加時間變動 |
 | FPGA | 平行資料路徑、精確 clock 行為 | HDL、時序約束與硬體工具 |
 
-你的 Raspberry Pi 3 Model B 可作 gateway／Linux 練習平台；它不是 Cortex-M MCU，不能直接執行 Cortex-M 的寄存器範例。Mac 是 host，目標板是 target；cross compiler 的輸出 ISA、ABI、作業系統都必須和 target 相符。
+Linux 單板電腦可作 gateway／Linux 練習平台；與微控制器的架構和週邊不同，不能直接套用另一種晶片的寄存器範例。Mac 是 host，目標板是 target；cross compiler 的輸出 ISA、ABI、作業系統都必須和 target 相符。
 
 <a id="s2"></a>
+
 ## 2. CPU、記憶體映射與開機
 
 CPU 執行指令；bus 連到 RAM、flash 與 peripherals。Memory-mapped I/O 把週邊控制映射成位址，但讀寫可能有副作用，例如 read-to-clear 或 write-one-to-clear。先讀 reference manual，不能對所有 status register 使用 read-modify-write。[D2]
@@ -63,7 +116,11 @@ uint32_t configure(uint32_t reg) {
 **例 E3：RAM 預算。** 32 KiB RAM，global/static 8 KiB、三個 task stacks 各 2 KiB、buffers 6 KiB、預留 4 KiB，剩下 8 KiB。這是配置估計；stack watermark、最深呼叫路徑與 interrupt nesting 還需測試。Heap 可用空間不等於任何時候都能成功配置相同大小的連續區塊。
 
 <a id="s3"></a>
+
 ## 3. GPIO、UART、SPI、I²C 與 timer
+
+> [!NOTE]
+> **讀這一節前：** UART 是雙方事先約定速度的串列傳輸；SPI 由時脈協調資料；I²C 以共用線路與位址選裝置。Baud 指符號率，8N1 是 8 個資料位、無 parity、1 個 stop bit；另有 start bit。Open-drain 只能主動拉低，拉高靠 pull-up。
 
 GPIO input 必須有明確電位；floating input 不能當作可靠 0。Output 的電壓和電流能力取決於器件，motor 或 relay 不能直接接 GPIO 當功率驅動。
 
@@ -81,6 +138,7 @@ I²C 參考 NXP UM10204；不同速度模式的電氣條件不同。SPI 沒有�
 **例 E5：timer。** 假設 timer input=48 MHz，prescaler register=47，則 tick=1 MHz；up-counter 從 0 到 ARR=999，一週期 1000 ticks，更新率=1 kHz。公式為 `f_update=f_timer/((PSC+1)(ARR+1))`，僅適用此題指定模式，不直接套用到 center-aligned PWM。
 
 <a id="s4"></a>
+
 ## 4. Polling、中斷與 DMA
 
 Polling 不斷查狀態，容易理解但可能空耗 CPU。Interrupt 在事件發生時轉到 ISR；DMA 讓硬體搬運資料，但仍需處理 ownership、completion、cache coherency 與錯誤。DMA 不等於完全沒有 CPU 成本。[D2]
@@ -100,7 +158,11 @@ flowchart TD
 **例 E6：burst 不是平均流量。** 每 1 ms 收一筆，consumer 停 30 ms，至少需容納 30 筆，端點同時事件可能多一筆；若 consumer 回來後也只有 1000 筆/s，它不能清除 backlog。要讓 backlog 下降，恢復時的服務率須高於到達率，或允許丟棄／降低流量。
 
 <a id="s5"></a>
+
 ## 5. 由 FSM 建立可理解的故障行為
+
+> [!NOTE]
+> **讀這一節前：** 故障設計先列出「可偵測的異常」與「安全反應」。Timeout 是等候超時；watchdog 是系統失去預期進展時的恢復機制；兩者都不能代替需求分析。
 
 把系統狀態與感測值分開。例如 NORMAL、ALARM、SENSOR_FAULT。先決定 fault 優先順序、警報是否 latch、何時允許 reset，才能寫轉移表。熱控制可用 hysteresis：到 30°C 開風扇、低於 28°C 才關，避免雜訊造成頻繁切換；這些是教學數值。
 
@@ -109,6 +171,7 @@ flowchart TD
 Watchdog 只在有意義的健康條件滿足時餵食。若獨立 thread 不管主工作是否卡死都餵狗，watchdog 失去作用。Reset 後保存 reset cause，並確認 actuator 初始狀態；watchdog 也不能替代功能與時序正確性。
 
 <a id="s6"></a>
+
 ## 6. Bring-up、Mac 練習與檢核
 
 先做 host model，再做板級 bring-up。第一次接板依序看供電、reset、clock、最小輸出、單一週邊、整合；保留可重現的已知良好版本。Simulator 能證明模型中的轉移，不能量測真實電壓、EMI 或 IRQ latency。
